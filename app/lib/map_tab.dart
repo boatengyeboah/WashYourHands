@@ -26,7 +26,7 @@ class _MapTabState extends State<MapTab> {
   );
 
   CameraPosition currentCameraPosition;
-
+  
   @override
   void initState() {
     super.initState();

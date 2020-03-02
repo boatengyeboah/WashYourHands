@@ -24,6 +24,10 @@ dependencies:
   google_maps_flutter: ^0.5.24+1
   sliding_up_panel: ^1.0.0
   http: ^0.12.0+4
+  timeago: ^2.0.26
+  url_launcher: ^5.4.2
+  flutter_native_dialog: ^0.1.0
+  shared_preferences: ^0.5.6+2
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +48,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
    - assets/ellipse.png
+   - assets/wash_background.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
