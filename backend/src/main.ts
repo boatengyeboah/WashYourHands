@@ -1,7 +1,7 @@
 'use strict';
 import * as express from "express";
 
-import PORT from './config';
+const PORT: string | number = process.env.PORT || 5000;
 
 const app = express();
 
