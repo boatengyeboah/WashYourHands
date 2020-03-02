@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:saving_our_planet/disclaimer_tab.dart';
 import 'package:saving_our_planet/map_tab.dart';
 import 'package:saving_our_planet/news_tab.dart';
 import 'package:saving_our_planet/resources_tab.dart';
@@ -22,6 +23,7 @@ class _MainTabsState extends State<MainTabs> {
     pages.add(NewsTab());
     pages.add(WashTab());
     pages.add(ResourcesTab());
+    pages.add(DisclaimerTab());
     super.initState();
   }
 
@@ -31,6 +33,8 @@ class _MainTabsState extends State<MainTabs> {
       body: IndexedStack(index: currentIndex, children: pages),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         currentIndex: currentIndex, // this will be set when a new tab is tapped
         onTap: (index) {
           setState(() {
@@ -53,6 +57,10 @@ class _MainTabsState extends State<MainTabs> {
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.solidLightbulb),
             title: Text('Resources'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(FontAwesomeIcons.info),
+            title: Text('Disclaimer'),
           ),
         ],
       ),

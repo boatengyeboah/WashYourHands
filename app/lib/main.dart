@@ -1,14 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:saving_our_planet/main_tabs.dart';
+import 'package:saving_our_planet/pref_keys.dart';
+import 'package:saving_our_planet/set_country.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MyApp());
+const int _bluePrimaryValue = 0xFF002952;
 
-class MyApp extends StatelessWidget {
-  static const int _bluePrimaryValue = 0xFF002952;
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  Widget initialWidget =  MainTabs();
+  
+  if (!prefs.containsKey(COUNTRY_DATA_SET_KEY)) {
+    initialWidget = SetCountry();
+  }
+
+  runZoned(() {
+    runApp(MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -37,9 +49,7 @@ class MyApp extends StatelessWidget {
           },
         ),
       ),
-      home: MainTabs(),
-    );
-  }
+      home:initialWidget,
+    ));
+  });
 }
-
-

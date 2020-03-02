@@ -30,7 +30,9 @@ class _WashTabState extends State<WashTab> {
       this.washedHandsHowManyTimesToday =
           prefs.getInt(WASHED_HANDS_TODAY_AMOUNT_KEY);
     } else {
-      this.washedHandsHowManyTimesToday = 0;
+      setState(() {
+        this.washedHandsHowManyTimesToday = 0;
+      });
     }
 
     await resetHandsWashedTodayIfNewDay();
