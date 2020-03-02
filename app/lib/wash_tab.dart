@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_dialog/flutter_native_dialog.dart';
 import 'package:saving_our_planet/spacing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WashTab extends StatefulWidget {
   WashTab({Key key}) : super(key: key);
@@ -10,6 +11,11 @@ class WashTab extends StatefulWidget {
 }
 
 class _WashTabState extends State<WashTab> {
+  static const WASHED_HANDS_TODAY_AMOUNT_KEY = "WASHED_HANDS_TODAY_AMOUNT_KEY";
+  static const LAST_WASH_HANDS_DATE_KEY = "";
+
+  int washedHandsHowManyTimesToday = -1;
+
   @override
   void initState() {
     initStoredData();
@@ -17,13 +23,20 @@ class _WashTabState extends State<WashTab> {
     super.initState();
   }
 
-  void initStoredData() {
+  void initStoredData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    if (prefs.containsKey(WASHED_HANDS_TODAY_AMOUNT_KEY)) {
+      this.washedHandsHowManyTimesToday =
+          prefs.getInt(WASHED_HANDS_TODAY_AMOUNT_KEY);
+    } else {
+      this.washedHandsHowManyTimesToday = 0;
+    }
+
+    await resetHandsWashedTodayIfNewDay();
   }
 
-  Future fetchData() {
-
-  }
+  Future fetchData() {}
 
   @override
   Widget build(BuildContext context) {
@@ -77,10 +90,30 @@ class _WashTabState extends State<WashTab> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Text('😧'),
-          Text('😐'),
-          Text('😃'),
-          Text('😎'),
+          Text(
+            '😧',
+            style: TextStyle(
+                color: Colors.grey.withOpacity(
+                    this.washedHandsHowManyTimesToday >= 0 ? 1 : 0.5)),
+          ),
+          Text(
+            '😐',
+            style: TextStyle(
+                color: Colors.grey.withOpacity(
+                    this.washedHandsHowManyTimesToday >= 1 ? 1 : 0.5)),
+          ),
+          Text(
+            '😃',
+            style: TextStyle(
+                color: Colors.grey.withOpacity(
+                    this.washedHandsHowManyTimesToday >= 2 ? 1 : 0.5)),
+          ),
+          Text(
+            '😎',
+            style: TextStyle(
+                color: Colors.grey.withOpacity(
+                    this.washedHandsHowManyTimesToday >= 3 ? 1 : 0.5)),
+          ),
         ],
       ),
     );
@@ -95,7 +128,7 @@ class _WashTabState extends State<WashTab> {
           Container(
             margin: inset3b,
             child: Text(
-              '4',
+              this.washedHandsHowManyTimesToday.toString(),
               style: Theme.of(context).textTheme.display4.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -122,6 +155,32 @@ class _WashTabState extends State<WashTab> {
 
     if (!result) {
       return;
+    }
+
+    await resetHandsWashedTodayIfNewDay();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      this.washedHandsHowManyTimesToday++;
+    });
+    prefs.setInt(
+        WASHED_HANDS_TODAY_AMOUNT_KEY, this.washedHandsHowManyTimesToday);
+    prefs.setInt(
+        LAST_WASH_HANDS_DATE_KEY, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future resetHandsWashedTodayIfNewDay() async {
+    final now = DateTime.now();
+    final lastMidnight = new DateTime(now.year, now.month, now.day);
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(LAST_WASH_HANDS_DATE_KEY)) {
+      int lastRecorded = prefs.getInt(LAST_WASH_HANDS_DATE_KEY);
+      if (lastMidnight.millisecondsSinceEpoch > lastRecorded) {
+        this.washedHandsHowManyTimesToday = 0;
+        prefs.setInt(
+            WASHED_HANDS_TODAY_AMOUNT_KEY, this.washedHandsHowManyTimesToday);
+      }
     }
   }
 }
