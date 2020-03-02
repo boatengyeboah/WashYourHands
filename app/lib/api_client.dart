@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:saving_our_planet/country.dart';
 import 'package:saving_our_planet/news.dart';
+import 'package:saving_our_planet/sanitry_ranking.dart';
 
 import 'map_data.dart';
 import 'package:http/http.dart' as http;
@@ -80,7 +81,7 @@ class ApiClient {
       data['states'].forEach((countryDataJson) {
         result.add(PlaceData(
             name: countryDataJson['name'],
-            id: countryDataJson['country_id'].toString()));
+            id: countryDataJson['id'].toString()));
       });
 
       return result;
@@ -106,6 +107,37 @@ class ApiClient {
       });
 
       return result;
+    } else {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception('Failed to load album');
+    }
+  }
+
+  static inputSanitryEntry(String cityId, String countryId) async {
+    final response = await http.get(
+        'https://save-planet.herokuapp.com/sanitary_entry?cityId=$cityId&countryId=$countryId');
+  }
+
+  static Future<SanitryRankingResponse> fetchSanitryRanking() async {
+    final response = await http
+        .get('https://save-planet.herokuapp.com/sanitary_rankings');
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = json.decode(response.body);
+
+      List<SanitryRanking> byCities = [];
+      List<SanitryRanking> byCountries = [];
+
+      data['data']['country_rankings'].forEach((d) {
+        byCountries.add(SanitryRanking.fromJson(d));
+      });
+
+      data['data']['city_rankings'].forEach((d) {
+        byCities.add(SanitryRanking.fromJson(d));
+      });
+
+      return SanitryRankingResponse(
+          byCities: byCities, byCountries: byCountries);
     } else {
       // If the server did not return a 200 OK response, then throw an exception.
       throw Exception('Failed to load album');
