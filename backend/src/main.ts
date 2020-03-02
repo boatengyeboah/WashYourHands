@@ -14,7 +14,8 @@ interface IMapData {
     createdAt: number,
     infected: number,
     recovered: number,
-    dead: number
+    dead: number,
+    city: string
 }
 
 const mapData: Array<IMapData> = [];
@@ -28,7 +29,8 @@ data.reports.forEach((report) => {
                 createdAt: new Date(report.date).getTime(),
                 infected: report.infected,
                 recovered: report.recovered,
-                dead: report.dead
+                dead: report.dead,
+                city: place.name
             });
             return;
         }
