@@ -12,7 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-
+  prefs.clear(); // TODO: Remove this.
   Widget initialWidget =  MainTabs();
   
   if (!prefs.containsKey(COUNTRY_DATA_SET_KEY)) {
