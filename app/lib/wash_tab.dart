@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_dialog/flutter_native_dialog.dart';
 import 'package:saving_our_planet/api_client.dart';
 import 'package:saving_our_planet/pref_keys.dart';
 import 'package:saving_our_planet/sanitry_ranking.dart';
@@ -252,29 +251,42 @@ class _WashTabState extends State<WashTab> {
   }
 
   _washedMyHandsTapped() async {
-    final result = await FlutterNativeDialog.showConfirmDialog(
-      title: "Did you just wash your hands?",
-      positiveButtonText: "Yes",
-      negativeButtonText: "No",
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Did you wash your hands?'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await resetHandsWashedTodayIfNewDay();
+
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                setState(() {
+                  this.washedHandsHowManyTimesToday++;
+                });
+                prefs.setInt(WASHED_HANDS_TODAY_AMOUNT_KEY,
+                    this.washedHandsHowManyTimesToday);
+                prefs.setInt(LAST_WASH_HANDS_DATE_KEY,
+                    DateTime.now().millisecondsSinceEpoch);
+
+                ApiClient.inputSanitryEntry(prefs.getString(CITY_ID_KEY),
+                    prefs.getString(COUNTRY_ID_KEY));
+              },
+            ),
+          ],
+        );
+      },
     );
-
-    if (!result) {
-      return;
-    }
-
-    await resetHandsWashedTodayIfNewDay();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      this.washedHandsHowManyTimesToday++;
-    });
-    prefs.setInt(
-        WASHED_HANDS_TODAY_AMOUNT_KEY, this.washedHandsHowManyTimesToday);
-    prefs.setInt(
-        LAST_WASH_HANDS_DATE_KEY, DateTime.now().millisecondsSinceEpoch);
-
-    ApiClient.inputSanitryEntry(
-        prefs.getString(CITY_ID_KEY), prefs.getString(COUNTRY_ID_KEY));
   }
 
   Future resetHandsWashedTodayIfNewDay() async {

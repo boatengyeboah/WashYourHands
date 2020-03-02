@@ -23,7 +23,7 @@ class _DisclaimerTabState extends State<DisclaimerTab> {
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: 'This app was created by: '),
+                  TextSpan(text: 'This app was made with ❤️ in San Francisco by: '),
                   WidgetSpan(
                     child: GestureDetector(
                         onTap: () {
