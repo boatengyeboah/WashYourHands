@@ -132,6 +132,63 @@ app.get('/news', async (req, res) => {
     res.json({success: true, data: results});
 });
 
+const fs = require('fs');
+
+app.get('/get_countries', async (req, res) => {
+    let rawdata = fs.readFileSync('./src/countries-stripped.json');
+    let countriesJson = JSON.parse(rawdata);
+    res.json({success: true, countries: countriesJson});
+});
+
+app.get('/get_states', async (req, res) => {
+    const query = req.query;
+    if (!query) {
+        res.json({success:false});
+        return;
+    }
+
+    const countryId = query["countryId"];
+    if (!countryId) {
+        res.json({success:false});
+        return;
+    }
+
+    let rawdata = fs.readFileSync('./src/states.json');
+    let statesJson = JSON.parse(rawdata);
+    const states = statesJson["states"];
+    let statesResults = [];
+    states.forEach((state)=>{
+        if (state["country_id"] === countryId) {
+            statesResults.push(state);
+        }
+    });
+    res.json({success: true, states: statesResults});
+});
+
+app.get('/get_cities', async(req, res)=>{
+    const query = req.query;
+    if (!query) {
+        res.json({success:false});
+        return;
+    }
+
+    const stateId = query["stateId"];
+    if (!stateId) {
+        res.json({success:false});
+        return;
+    }
+
+    let rawdata = fs.readFileSync('./src/cities-stripped.json');
+    let cities = JSON.parse(rawdata);
+    const results = [];
+    cities.forEach((city)=>{
+        if (city["state_id"] === stateId) {
+            results.push(city);
+        }
+    });
+    res.json({success:true, cities: results});
+
+});
 
 interface ICityRank {
     cityId: string,
@@ -146,25 +203,25 @@ interface ICountryRank {
 
 app.get('/sanitary_rankings', async (req, res) => {
     const results = await SanitaryRanking.find({});
-    let cityRankings : Array<ICityRank> = [];
-    let countryRankings : Array<ICountryRank> = [];
+    let cityRankings: Array<ICityRank> = [];
+    let countryRankings: Array<ICountryRank> = [];
     let countryCityTotals = new Map<string, number>();
-    results.forEach((result)=>{
+    results.forEach((result) => {
         const countryId = result["countryId"];
-        const score =  result["score"];
+        const score = result["score"];
         cityRankings.push(<ICityRank>{
             cityId: result["cityId"],
             score: score
         });
         if (countryCityTotals.has(countryId)) {
             const currentVal = countryCityTotals.get(countryId);
-            countryCityTotals.set(countryId, currentVal+score);
+            countryCityTotals.set(countryId, currentVal + score);
         } else {
             countryCityTotals.set(countryId, score);
         }
     });
 
-    countryCityTotals.forEach((score, countryId, map)=>{
+    countryCityTotals.forEach((score, countryId, map) => {
         countryRankings.push(<ICountryRank>{
             countryId: countryId,
             score: score
@@ -189,7 +246,7 @@ app.get('/sanitary_entry', async (req, res) => {
     }
     const cityId = body["cityId"];
     const countryId = body["countryId"];
-    if (cityId == null && countryId ==null) {
+    if (cityId == null && countryId == null) {
         res.json({success: false});
         return;
     }
@@ -197,7 +254,7 @@ app.get('/sanitary_entry', async (req, res) => {
         const result = await SanitaryRanking.findOneAndUpdate({
             cityId: cityId,
             countryId: countryId
-        },{
+        }, {
             $inc: {
                 score: 1
             },
@@ -205,7 +262,7 @@ app.get('/sanitary_entry', async (req, res) => {
                 cityId: cityId,
                 countryId: countryId,
             }
-        },{
+        }, {
             upsert: true,
             new: true
         });
@@ -214,8 +271,6 @@ app.get('/sanitary_entry', async (req, res) => {
     }
     res.json({success: true});
 });
-
-
 
 
 process.on('SIGINT', function () {
