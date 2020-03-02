@@ -192,11 +192,13 @@ app.get('/get_cities', async(req, res)=>{
 
 interface ICityRank {
     cityId: string,
+    name: string,
     score: number
 }
 
 interface ICountryRank {
     countryId: string,
+    name:string,
     score: number
 }
 
@@ -206,11 +208,22 @@ app.get('/sanitary_rankings', async (req, res) => {
     let cityRankings: Array<ICityRank> = [];
     let countryRankings: Array<ICountryRank> = [];
     let countryCityTotals = new Map<string, number>();
+
+    // TODO: no need to load file each time. find a way to not load it to improve speed.
+    let citiesRawData = fs.readFileSync('./src/cities-stripped.json');
+    let cities = JSON.parse(citiesRawData);
+
+    let countriesRawFile = fs.readFileSync('./src/countries-stripped.json');
+    let countriesJson = JSON.parse(countriesRawFile);
+
+
     results.forEach((result) => {
         const countryId = result["countryId"];
         const score = result["score"];
+        let cityName = "";
         cityRankings.push(<ICityRank>{
             cityId: result["cityId"],
+            name: cities.find((city)=> city["city_id"] == result["cityId"])["name"],
             score: score
         });
         if (countryCityTotals.has(countryId)) {
@@ -224,7 +237,8 @@ app.get('/sanitary_rankings', async (req, res) => {
     countryCityTotals.forEach((score, countryId, map) => {
         countryRankings.push(<ICountryRank>{
             countryId: countryId,
-            score: score
+            score: score,
+            name:countriesJson.find((country)=> country["id"] == countryId)["name"],
         })
     });
 
