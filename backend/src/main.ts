@@ -8,12 +8,26 @@ import {createClient, RedisClient} from "redis";
 import * as mongoose from 'mongoose';
 
 const PORT: string | number = process.env.PORT || 5000;
-
+import * as Agenda from "agenda";
 const app = express();
 
 mongoose.connect(process.env.DB_URL);
 mongoose.connection.on('connected', function () {
     console.log("Mongoose successfully connected");
+    // Agenda
+    const agenda = new Agenda();
+    agenda.mongo(mongoose.connection.db);
+    agenda.on("ready", async () => {
+        agenda.define("fetchNews", maybeFetchLatestNews);
+
+        agenda.every('30 minutes', 'fetchNews');
+    });
+
+    if (process.env.NODE_ENV != "prod") {
+        const Agendash = require('agendash');
+        app.use('/dash', Agendash(agenda));
+    }
+
 });
 mongoose.connection.on('error', function (error) {
     console.log("Mongoose connection error");
@@ -83,15 +97,16 @@ redisClient = createClient(
 redisClient.on("error", function (err) {
     console.log(`Redis error ${err}`);
 });
+
+
+
+
 redisClient.on("connect", function () {
     console.log("Redis successfully connected");
-    // redisClient.set("last_news_fetch_date", new Date().toISOString());
-    maybeFetchLatestNews();
-
 });
 
 
-async function maybeFetchLatestNews() {
+async function maybeFetchLatestNews(job, done) {
     redisClient.get("last_news_fetch_date", async (err, lastFetchDateString) => {
         if (err) return console.log(err);
         console.log("lastFetchDateString", lastFetchDateString);
@@ -112,8 +127,9 @@ async function maybeFetchLatestNews() {
                 redisClient.set("last_news_fetch_date", new Date().toISOString());
             });
         } else {
-            console.log("not feteching news diff =", diff);
+            console.log("not fetching news diff =", diff);
         }
+        done();
     });
 
 
