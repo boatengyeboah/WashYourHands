@@ -9,6 +9,7 @@ import * as mongoose from 'mongoose';
 
 const PORT: string | number = process.env.PORT || 5000;
 import * as Agenda from "agenda";
+
 const app = express();
 
 // News api
@@ -89,6 +90,7 @@ mongoose.connection.on('disconnected', function () {
 
 import data = require("./data.json");
 import {NewsHeadline} from "./models/NewsHeadline";
+import {SanitaryRanking} from "./models/SanitaryRanking";
 
 interface IMapData {
     latitude: number,
@@ -128,6 +130,89 @@ app.get('/map_data', (req, res) => {
 app.get('/news', async (req, res) => {
     const results = await NewsHeadline.find({}).sort({createdAt: -1}).limit(12);
     res.json({success: true, data: results});
+});
+
+
+interface ICityRank {
+    cityId: string,
+    score: number
+}
+
+interface ICountryRank {
+    countryId: string,
+    score: number
+}
+
+
+app.get('/sanitary_rankings', async (req, res) => {
+    const results = await SanitaryRanking.find({});
+    let cityRankings : Array<ICityRank> = [];
+    let countryRankings : Array<ICountryRank> = [];
+    let countryCityTotals = new Map<string, number>();
+    results.forEach((result)=>{
+        const countryId = result["countryId"];
+        const score =  result["score"];
+        cityRankings.push(<ICityRank>{
+            cityId: result["cityId"],
+            score: score
+        });
+        if (countryCityTotals.has(countryId)) {
+            const currentVal = countryCityTotals.get(countryId);
+            countryCityTotals.set(countryId, currentVal+score);
+        } else {
+            countryCityTotals.set(countryId, score);
+        }
+    });
+
+    countryCityTotals.forEach((score, countryId, map)=>{
+        countryRankings.push(<ICountryRank>{
+            countryId: countryId,
+            score: score
+        })
+    });
+
+    res.json({
+        success: true,
+        data: {
+            "city_rankings": cityRankings,
+            "country_rankings": countryRankings
+        }
+    })
+
+});
+
+app.get('/sanitary_entry', async (req, res) => {
+    const body = req.query;
+    if (body == null) {
+        res.json({success: false});
+        return;
+    }
+    const cityId = body["cityId"];
+    const countryId = body["countryId"];
+    if (cityId == null && countryId ==null) {
+        res.json({success: false});
+        return;
+    }
+    try {
+        const result = await SanitaryRanking.findOneAndUpdate({
+            cityId: cityId,
+            countryId: countryId
+        },{
+            $inc: {
+                score: 1
+            },
+            $setOnInsert: {
+                cityId: cityId,
+                countryId: countryId,
+            }
+        },{
+            upsert: true,
+            new: true
+        });
+    } catch (e) {
+        console.log("Error", e);
+    }
+    res.json({success: true});
 });
 
 
