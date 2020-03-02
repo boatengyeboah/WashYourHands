@@ -114,7 +114,8 @@ data.reports.forEach((report) => {
                 infected: report.infected,
                 recovered: report.recovered,
                 dead: report.dead,
-                city: place.name
+                city: place.name,
+                last_updated: report.date
             });
             return;
         }
