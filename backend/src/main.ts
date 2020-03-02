@@ -6,8 +6,7 @@ import PORT from './config';
 const app = express();
 
 
-import * as data from "./data.json";
-
+import data = require("./data.json");
 interface IMapData {
     latitude: number,
     longitude: number,
