@@ -33,7 +33,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
+  flutter_launcher_icons: ^0.7.4
 
+flutter_icons:
+  android: "launcher_icon" 
+  ios: true
+  image_path: "assets/launcher_icon.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspecx
@@ -50,6 +56,7 @@ flutter:
   assets:
    - assets/ellipse.png
    - assets/wash_background.png
+   - assets/launcher_icon.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
