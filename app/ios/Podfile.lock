@@ -12,6 +12,8 @@ PODS:
   - GoogleMaps/Base (2.7.0)
   - GoogleMaps/Maps (2.7.0):
     - GoogleMaps/Base
+  - searchable_dropdown (1.1.1):
+    - Flutter
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_macos (0.0.1):
@@ -30,6 +32,7 @@ DEPENDENCIES:
   - flutter_native_dialog (from `.symlinks/plugins/flutter_native_dialog/ios`)
   - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - google_maps_flutter (from `.symlinks/plugins/google_maps_flutter/ios`)
+  - searchable_dropdown (from `.symlinks/plugins/searchable_dropdown/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
@@ -50,6 +53,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   google_maps_flutter:
     :path: ".symlinks/plugins/google_maps_flutter/ios"
+  searchable_dropdown:
+    :path: ".symlinks/plugins/searchable_dropdown/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
   shared_preferences_macos:
@@ -69,6 +74,7 @@ SPEC CHECKSUMS:
   flutter_plugin_android_lifecycle: 47de533a02850f070f5696a623995e93eddcdb9b
   google_maps_flutter: d0dd62f5a7d39bae61057eb9f52dd778d99c7c6c
   GoogleMaps: f79af95cb24d869457b1f961c93d3ce8b2f3b848
+  searchable_dropdown: 5058be32fdc5e0481d300ff2087129072e71bd62
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9

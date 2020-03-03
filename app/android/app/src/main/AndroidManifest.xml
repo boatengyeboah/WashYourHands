@@ -7,8 +7,8 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="saving_our_planet"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Coronavirus App"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -26,5 +26,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD1_I8Y2aBEGxL58SQUicPN8XIzNXlzpN8"/>
     </application>
 </manifest>

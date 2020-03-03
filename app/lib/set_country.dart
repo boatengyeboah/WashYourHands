@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:saving_our_planet/api_client.dart';
 import 'package:saving_our_planet/country.dart';
 import 'package:saving_our_planet/main_tabs.dart';
 import 'package:saving_our_planet/pref_keys.dart';
@@ -14,9 +15,39 @@ class SetCountry extends StatefulWidget {
 }
 
 class _SetCountryState extends State<SetCountry> {
-  Country selectedCountry;
-  Country selectedState;
-  Country selectedCity;
+  List<PlaceData> countries = [];
+  List<PlaceData> states = [];
+  List<PlaceData> cities = [];
+  PlaceData selectedCountry;
+  PlaceData selectedState;
+  PlaceData selectedCity;
+
+  @override
+  void initState() {
+    fetchCountries();
+    super.initState();
+  }
+
+  fetchCountries() async {
+    List<PlaceData> _countries = await ApiClient.fetchCountries();
+    setState(() {
+      this.countries = _countries;
+    });
+  }
+
+  fetchStateData() async {
+    List<PlaceData> _states = await ApiClient.fetchStates(selectedCountry.id);
+    setState(() {
+      this.states = _states;
+    });
+  }
+
+  fetchCities() async {
+    List<PlaceData> _cities = await ApiClient.fetchCities(selectedState.id);
+    setState(() {
+      this.cities = _cities;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +63,9 @@ class _SetCountryState extends State<SetCountry> {
                 "We'll use this data to show you relevant information based on your location."),
             Container(
               margin: inset5t,
-              child: SearchableDropdown<Country>(
-                items: fakeCountries().map((country) {
-                  return DropdownMenuItem<Country>(
+              child: SearchableDropdown<PlaceData>(
+                items: this.countries.map((country) {
+                  return DropdownMenuItem<PlaceData>(
                     child: Text(country.name),
                     value: country,
                   );
@@ -42,45 +73,63 @@ class _SetCountryState extends State<SetCountry> {
                 onChanged: (country) {
                   setState(() {
                     this.selectedCountry = country;
+                    fetchStateData();
                   });
                 },
                 label: 'Select your country',
-              ),
-            ),
-            Container(
-              margin: inset5t,
-              child: SearchableDropdown<Country>(
-                items: fakeCountries().map((state) {
-                  return DropdownMenuItem<Country>(
-                    child: Text(state.name),
-                    value: state,
-                  );
-                }).toList(),
-                onChanged: (state) {
-                  setState(() {
-                    this.selectedState = state;
-                  });
+                searchFn:
+                    (String keyword, List<DropdownMenuItem<PlaceData>> items) {
+                  return searchFn(items, keyword);
                 },
-                label: 'Select your state',
               ),
             ),
-            Container(
-              margin: inset5t,
-              child: SearchableDropdown<Country>(
-                items: fakeCountries().map((city) {
-                  return DropdownMenuItem<Country>(
-                    child: Text(city.name),
-                    value: city,
-                  );
-                }).toList(),
-                onChanged: (city) {
-                  setState(() {
-                    this.selectedCity = city;
-                  });
-                },
-                label: 'Select your city',
+            if (selectedCountry != null) ...[
+              Container(
+                margin: inset5t,
+                child: SearchableDropdown<PlaceData>(
+                  items: states.map((state) {
+                    return DropdownMenuItem<PlaceData>(
+                      child: Text(state.name),
+                      value: state,
+                    );
+                  }).toList(),
+                  onChanged: (state) {
+                    setState(() {
+                      this.selectedState = state;
+                      fetchCities();
+                    });
+                  },
+                  label: 'Select your state',
+                  searchFn: (String keyword,
+                      List<DropdownMenuItem<PlaceData>> items) {
+                    return searchFn(items, keyword);
+                  },
+                ),
               ),
-            ),
+            ],
+            if (selectedState != null) ...[
+              Container(
+                margin: inset5t,
+                child: SearchableDropdown<PlaceData>(
+                  items: cities.map((city) {
+                    return DropdownMenuItem<PlaceData>(
+                      child: Text(city.name),
+                      value: city,
+                    );
+                  }).toList(),
+                  onChanged: (city) {
+                    setState(() {
+                      this.selectedCity = city;
+                    });
+                  },
+                  label: 'Select your city',
+                  searchFn: (String keyword,
+                      List<DropdownMenuItem<PlaceData>> items) {
+                    return searchFn(items, keyword);
+                  },
+                ),
+              ),
+            ],
             Container(
               margin: inset4t,
               child: FlatButton(
@@ -100,13 +149,17 @@ class _SetCountryState extends State<SetCountry> {
     );
   }
 
-  List<Country> fakeCountries() {
-    List<Country> result = [];
+  List<int> searchFn(List<DropdownMenuItem<PlaceData>> items, String keyword) {
+    List<int> shownIndexes = [];
 
-    result.add(Country(id: '1', name: 'United States'));
-    result.add(Country(id: '2', name: 'United Kingdom'));
-
-    return result;
+    int i = 0;
+    items.forEach((item) {
+      if (item.value.name.toLowerCase().contains(keyword.toLowerCase())) {
+        shownIndexes.add(i);
+      }
+      i++;
+    });
+    return shownIndexes;
   }
 
   bool isInputValid() {

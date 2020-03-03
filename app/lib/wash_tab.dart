@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_dialog/flutter_native_dialog.dart';
+import 'package:saving_our_planet/api_client.dart';
+import 'package:saving_our_planet/pref_keys.dart';
+import 'package:saving_our_planet/sanitry_ranking.dart';
 import 'package:saving_our_planet/spacing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,6 +15,8 @@ class WashTab extends StatefulWidget {
 class _WashTabState extends State<WashTab> {
   static const WASHED_HANDS_TODAY_AMOUNT_KEY = "WASHED_HANDS_TODAY_AMOUNT_KEY";
   static const LAST_WASH_HANDS_DATE_KEY = "";
+  SanitryRankingResponse sanitryRankingResponse;
+  bool rankByCities = true;
 
   int washedHandsHowManyTimesToday = -1;
 
@@ -38,7 +42,14 @@ class _WashTabState extends State<WashTab> {
     await resetHandsWashedTodayIfNewDay();
   }
 
-  Future fetchData() {}
+  Future fetchData() async {
+    SanitryRankingResponse _sanitryRankingResponse =
+        await ApiClient.fetchSanitryRanking();
+    setState(() {
+      this.sanitryRankingResponse = _sanitryRankingResponse;
+      print(this.sanitryRankingResponse.byCities.length);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +63,22 @@ class _WashTabState extends State<WashTab> {
           onRefresh: fetchData,
           child: ListView(
             children: <Widget>[
-              emojiRow(),
+              RichText(
+                  text: TextSpan(children: [
+                TextSpan(
+                    text:
+                        "The best prevention against the coronavirus is still washing your hands. Tap the button below every time you wash your hands and let's see which country is doing their best.\n"),
+                TextSpan(
+                    text: '#WeAreAllInThisTogether',
+                    style: Theme.of(context).textTheme.body1.copyWith(
+                          color: Color(0xFF62B4FF),
+                          fontWeight: FontWeight.bold,
+                        ))
+              ], style: Theme.of(context).textTheme.body1)),
+              Container(
+                child: emojiRow(),
+                margin: inset3t,
+              ),
               dataWidget(),
               buttonRow(),
               Container(
@@ -64,9 +90,85 @@ class _WashTabState extends State<WashTab> {
               ),
               Text(
                 'See which countries and cities are washing their hands the most.',
-              )
+              ),
+              Container(
+                margin: inset4t,
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        margin: inset2r,
+                        child: tabWidget(
+                          text: 'Cities',
+                          selected: rankByCities,
+                          onTap: () {
+                            setState(() {
+                              this.rankByCities = true;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: inset2r,
+                        child: tabWidget(
+                          text: 'Countries',
+                          selected: !rankByCities,
+                          onTap: () {
+                            setState(() {
+                              this.rankByCities = false;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ...selectedSanitryRankings().map((ranking) {
+                return ListTile(
+                  title: Text(ranking.name),
+                  trailing: Text(ranking.score.toString()),
+                );
+              }).toList()
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  List<SanitryRanking> selectedSanitryRankings() {
+    List<SanitryRanking> result = [];
+
+    if (this.sanitryRankingResponse != null) {
+      if (rankByCities) {
+        return this.sanitryRankingResponse.byCities;
+      } else {
+        return this.sanitryRankingResponse.byCountries;
+      }
+    }
+
+    return result;
+  }
+
+  Widget tabWidget({VoidCallback onTap, bool selected, String text}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40.0,
+        child: Center(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.subtitle.copyWith(
+                  color: selected ? Colors.white : Color(0xFF62B4FF),
+                ),
+          ),
+        ),
+        decoration: BoxDecoration(
+          color: selected ? Color(0xFF62B4FF) : Colors.white,
+          borderRadius: BorderRadius.circular(20.0),
         ),
       ),
     );
@@ -149,26 +251,42 @@ class _WashTabState extends State<WashTab> {
   }
 
   _washedMyHandsTapped() async {
-    final result = await FlutterNativeDialog.showConfirmDialog(
-      title: "Did you just wash your hands?",
-      positiveButtonText: "Yes",
-      negativeButtonText: "No",
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Did you wash your hands?'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await resetHandsWashedTodayIfNewDay();
+
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                setState(() {
+                  this.washedHandsHowManyTimesToday++;
+                });
+                prefs.setInt(WASHED_HANDS_TODAY_AMOUNT_KEY,
+                    this.washedHandsHowManyTimesToday);
+                prefs.setInt(LAST_WASH_HANDS_DATE_KEY,
+                    DateTime.now().millisecondsSinceEpoch);
+
+                ApiClient.inputSanitryEntry(prefs.getString(CITY_ID_KEY),
+                    prefs.getString(COUNTRY_ID_KEY));
+              },
+            ),
+          ],
+        );
+      },
     );
-
-    if (!result) {
-      return;
-    }
-
-    await resetHandsWashedTodayIfNewDay();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      this.washedHandsHowManyTimesToday++;
-    });
-    prefs.setInt(
-        WASHED_HANDS_TODAY_AMOUNT_KEY, this.washedHandsHowManyTimesToday);
-    prefs.setInt(
-        LAST_WASH_HANDS_DATE_KEY, DateTime.now().millisecondsSinceEpoch);
   }
 
   Future resetHandsWashedTodayIfNewDay() async {
