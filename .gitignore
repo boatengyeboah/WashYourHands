@@ -1,2 +1,5 @@
 backend/node_modules
 backend/.env
+app/android/key.properties
+app/android/CoronaVirusAppkey.jks
+app/android/app/CoronaVirusAppkey.jks
