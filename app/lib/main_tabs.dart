@@ -19,10 +19,10 @@ class _MainTabsState extends State<MainTabs> {
 
   @override
   void initState() {
-    pages.add(MapTab());
+//    pages.add(MapTab());
     pages.add(NewsTab());
     pages.add(WashTab());
-    pages.add(ResourcesTab());
+//    pages.add(ResourcesTab());
     pages.add(DisclaimerTab());
     super.initState();
   }
@@ -42,10 +42,10 @@ class _MainTabsState extends State<MainTabs> {
           });
         },
         items: [
-          BottomNavigationBarItem(
-            icon: new Icon(Icons.map),
-            title: new Text('Home'),
-          ),
+//          BottomNavigationBarItem(
+//            icon: new Icon(Icons.map),
+//            title: new Text('Home'),
+//          ),
           BottomNavigationBarItem(
             icon: new Icon(FontAwesomeIcons.solidNewspaper),
             title: new Text('News'),
@@ -54,10 +54,10 @@ class _MainTabsState extends State<MainTabs> {
             icon: Icon(FontAwesomeIcons.handHolding),
             title: Text('Wash'),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.solidLightbulb),
-            title: Text('Resources'),
-          ),
+//          BottomNavigationBarItem(
+//            icon: Icon(FontAwesomeIcons.solidLightbulb),
+//            title: Text('Resources'),
+//          ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.info),
             title: Text('Disclaimer'),

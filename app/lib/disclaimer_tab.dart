@@ -92,11 +92,6 @@ class _DisclaimerTabState extends State<DisclaimerTab> {
                 style: Theme.of(context).textTheme.display1,
               ),
             ),
-            Container(
-              margin: inset3t,
-              child: Text('https://coronavirus.app/\n'),
-            ),
-            Text('World Health Organization News\n'),
             Text('NewsAPI.org\n'),
             Text(
                 'https://github.com/hiiamrohit/Countries-States-Cities-database\n'),
