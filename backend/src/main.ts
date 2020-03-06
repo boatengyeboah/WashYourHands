@@ -54,7 +54,7 @@ mongoose.connection.on('connected', function () {
                 console.log("diff", diff);
                 if (diff > 30) {
                     newsapi.v2.topHeadlines({
-                        q: 'Corona Virus',
+                        q: '',
                         language: 'en',
                         country: 'us'
                     }).then(response => {

@@ -67,7 +67,7 @@ class _WashTabState extends State<WashTab> {
                   text: TextSpan(children: [
                 TextSpan(
                     text:
-                        "The best prevention against the coronavirus is still washing your hands. Tap the button below every time you wash your hands and let's see which country is doing their best.\n"),
+                        "Tap the button below every time you wash your hands and let's see which country is doing their best.\n"),
                 TextSpan(
                     text: '#WeAreAllInThisTogether',
                     style: Theme.of(context).textTheme.body1.copyWith(

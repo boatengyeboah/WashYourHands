@@ -58,10 +58,10 @@ class _MainTabsState extends State<MainTabs> {
 //            icon: Icon(FontAwesomeIcons.solidLightbulb),
 //            title: Text('Resources'),
 //          ),
-          BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.info),
-            title: Text('Disclaimer'),
-          ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(FontAwesomeIcons.info),
+          //   title: Text('Disclaimer'),
+          // ),
         ],
       ),
     );
